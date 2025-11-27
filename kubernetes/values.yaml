@@ -61,7 +61,7 @@ frontend:
 portalbackend:
   image:
     repository: hbpmip/portal-backend
-    tag: new_frontend_3
+    tag: new_frontend_7
   config:
     logLevel: INFO
     logLevelFramework: INFO
