@@ -26,7 +26,7 @@ From now on, most of our deployments will be done with Ubuntu Server 22.04, but 
 ## Components:
 Now, with the Kubernetes (K8s) deployment, we have 2 main component packs, that need to be deployed, which come as Helm charts:
 
-### The engine: [Exareme2](https://github.com/madgik/Exareme2/tree/master/kubernetes)
+### The engine: [Exaflow](https://github.com/madgik/Exareme2/tree/master/kubernetes)
 * [controller](https://github.com/madgik/Exareme2/tree/master/exareme2/controller)
 
 * [monetdb](https://github.com/madgik/Exareme2/tree/master/monetdb)

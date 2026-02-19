@@ -27,16 +27,16 @@ jobs:
         run: docker compose version
 
       - name: Deploy portalbackend and exareme2
-        working-directory: ./dev/
+        working-directory: ./deployment/dev/
         run: bash start.sh
 
       - name: Get deployment status
         run: docker ps
 
       - name: Install python dependencies
-        working-directory: ./dev/
+        working-directory: ./deployment/dev/
         run: pip install -r requirements.txt
 
       - name: Run the dev tests
-        working-directory: ./dev/
+        working-directory: ./deployment/dev/
         run: pytest

@@ -37,7 +37,7 @@ services:
       - SOFT_RESTART_MEMORY_LIMIT=1000
       - HARD_RESTART_MEMORY_LIMIT=1000
     volumes:
-      - ../data:/opt/data
+      - ./data:/opt/data
 
   exareme2_global_monetdb:
     image: madgik/exareme2_db:${EXAREME2}
@@ -47,7 +47,7 @@ services:
       - SOFT_RESTART_MEMORY_LIMIT=1000
       - HARD_RESTART_MEMORY_LIMIT=1000
     volumes:
-      - ../data:/opt/data
+      - ./data:/opt/data
 
   exareme2_local_mipdb:
     image: madgik/exareme2_mipdb:${EXAREME2}
@@ -58,7 +58,7 @@ services:
       - DATA_PATH=/opt/data
       - SQLITE_DB_NAME=local
     volumes:
-      - ../data:/opt/data
+      - ./data:/opt/data
 
   exareme2_global_mipdb:
     image: madgik/exareme2_mipdb:${EXAREME2}
@@ -69,7 +69,7 @@ services:
       - DATA_PATH=/opt/data
       - SQLITE_DB_NAME=global
     volumes:
-      - ../data:/opt/data
+      - ./data:/opt/data
 
   exareme2_local:
     image: madgik/exareme2_worker:${EXAREME2}
@@ -106,7 +106,7 @@ services:
   exareme2_global:
     image: madgik/exareme2_worker:${EXAREME2}
     volumes:
-      - ../data:/opt/data
+      - ./data:/opt/data
     environment:
       - FEDERATION=dementia
       - WORKER_IDENTIFIER=global
@@ -297,8 +297,8 @@ services:
 #    image: jboss/keycloak:15.0.2
 #    command: -Djboss.http.port=8095
 #    volumes:
-#      - ../config/keycloak/keycloak.json:/tmp/mip.json
-#      - ../config/keycloak/HBPTheme:/opt/jboss/keycloak/themes/HBPTheme
+#      - ./config/keycloak/keycloak.json:/tmp/mip.json
+#      - ./config/keycloak/HBPTheme:/opt/jboss/keycloak/themes/HBPTheme
 #    environment:
 #      DB_VENDOR: POSTGRES
 #      DB_ADDR: keycloak_db
