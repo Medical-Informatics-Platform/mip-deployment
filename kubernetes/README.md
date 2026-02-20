@@ -50,6 +50,67 @@ On each **worker** node, a folder should be created `/data/<MIP_INSTANCE_OR_FEDE
 every pathology for which we will have at least one dataset.
 Afterward, The dataset CSV files should be placed in their proper pathology folder.
 
+## Configuration
+Prior to deploying it (on a microk8s K8s cluster of one or more nodes), there are a few adjustments to make in `values.yaml`. Each top-level section controls a part of the stack:
+
+* `cluster`: namespace, storage classes and whether the cluster provisions persistent volumes dynamically (`managed: true`).
+* `network`: ingress/tls configuration, public hostname and whether the UI is exposed directly or through a reverse proxy (`link`).
+* `frontend`, `portalbackend`, `portalbackendDatabase`: container images and component specific options.
+* `keycloak`: toggles the connection parameters to the external Keycloak instance (`enabled`, `host`, `protocol`, `realm`, `clientId`).
+
+Copy `values.yaml` to a new file (for example `my-values.yaml`) and edit it in-place. A few important knobs:
+
+```yaml
+network:
+  link: proxied            # use "direct" when exposing the UI publicly
+  publicHost: mip.example.org
+  publicProtocol: https
+
+frontend:
+  backend:
+    host: portalbackend-service
+    port: 8080
+    context: services
+  ingress:
+    redirectRootTo: /home       # optional 302 redirect for the landing page
+    tlsSecretName: frontend-tls
+
+keycloak:
+  enabled: true
+  host: iam.example.org
+  protocol: https
+  realm: MIP
+  clientId: mipfed
+
+portalbackend:
+  service:
+    exposeDebug:
+      enabled: false       # switch to true to publish debugging ports through a LoadBalancer
+
+The reachability diagram from the legacy profiles is still valid as a reference for deciding the correct `network.*` settings:
+![MIP Reachability Scheme](../doc/MIP_Configuration.png)
+
+### MACHINE_MAIN_IP
+This is the machine's main IP address. Generally, it's the IP address of the first NIC after the local one.  
+If the MIP is running on top of a VPN, you may want to put the VPN interface's IP address.  
+If you reach the machine through a public IP, if this IP is **NOT** directly assigned on the machine, but is using static NAT, you still **MUST** set the **INTERNAL** IP of the machine itself!
+
+### MACHINE_PUBLIC_FQDN
+This is the public, fully qualified domain name of the MIP, the main URL on which you want to reach the MIP from the Internet. This may point:
+* Directly on the public IP of the MIP, for a **direct** use case. It may be assigned on the machine or used in front as a static NAT
+* On the public IP of the reverse-proxy server, for a **proxied** use case
+
+### MACHINE_PRIVATE_FQDN_OR_IP
+This is **ONLY** used in a **proxied** use case situation.  
+It's actually the internal IP or address from which the reverse-proxy server "sees" (reaches) the MIP machine.
+
+These three settings map directly to the `network` section in `values.yaml` (`publicHost`, `link`, `publicProtocol`). When running behind a reverse proxy also set `externalProtocol` to describe the protocol used between the proxy and the MIP pods.
+
+**WARNING!**: In **ANY** case, when you use an **EXTERNAL** KeyCloak service (i.e. iam.ebrains.eu), make sure that you use the correct *CLIENT_ID* and *CLIENT_SECRET* to match the MIP instance you're deploying!
+
+After tailoring `values.yaml` you can deploy the UI Helm chart. We still recommend deploying the engine Helm charts first, before installing the UI components.
+
+
 ### Microk8s installation
 On a running Ubuntu (we recommend 22.04) distribution, install microk8s (we **HIGHLY** recommend to **NOT** install Docker on your Kubernetes cluster!):
 ```
@@ -123,26 +184,7 @@ For a more in-depth guide on deploying Exaflow, please refer to the documentatio
   ```
   sudo chown -R mipadmin.mipadmin /opt/mip-deployment
   ```
-* Install JupyterHub in the same namespace (hub-only notebook mode)
-  ```
-  microk8s helm3 repo add jupyterhub https://jupyterhub.github.io/helm-chart
-  microk8s helm3 repo update
-  microk8s helm3 upgrade --install jupyterhub jupyterhub/jupyterhub \
-    -n <NAMESPACE> \
-    --create-namespace \
-    -f /opt/mip-deployment/kubernetes/jupyterhub.values.yaml
-  ```
-  In your `/opt/mip-deployment/kubernetes/my-values.yaml`, enable notebook integration:
-  ```
-  notebook:
-    enabled: true
-    server:
-      host: jupyterhub-proxy-public
-      port: 80
-      context: notebook
-      landingPath: /hub/spawn
-  ```
-  If you use a release name other than `jupyterhub`, adjust `notebook.server.host` to `<RELEASE_NAME>-proxy-public`.
+
 * Copy `values.yaml` to `/opt/mip-deployment/kubernetes/my-values.yaml` and tailor it to your environment.
 * Deploy (or upgrade) the Helm release with your customised values
   ```
