@@ -82,11 +82,6 @@ keycloak:
   realm: MIP
   clientId: mipfed
 
-platform-backend:
-  service:
-    exposeDebug:
-      enabled: false       # switch to true to publish debugging ports through a LoadBalancer
-
 The reachability diagram from the legacy profiles is still valid as a reference for deciding the correct `network.*` settings:
 ![MIP Reachability Scheme](../doc/MIP_Configuration.png)
 
