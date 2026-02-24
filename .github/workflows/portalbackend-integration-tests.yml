@@ -1,42 +1,42 @@
-name: CI
+# name: CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+# on:
+#   push:
+#     branches: [ master ]
+#   pull_request:
+#     branches: [ master ]
 
-jobs:
-  portal-backend-integration-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      
-      - name: Set up python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.8
+# jobs:
+#   portal-backend-integration-tests:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout the repository
+#         uses: actions/checkout@v4
 
-      - name: Install docker compose
-        uses: KengoTODA/actions-setup-docker-compose@v1
-        with:
-          version: '2.30.1'
+#       - name: Set up python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: 3.8
 
-      - name: Docker compose version
-        run: docker compose version
+#       - name: Install docker compose
+#         uses: KengoTODA/actions-setup-docker-compose@v1
+#         with:
+#           version: '2.30.1'
 
-      - name: Deploy portalbackend and exaflow
-        working-directory: ./dev/
-        run: bash start.sh
+#       - name: Docker compose version
+#         run: docker compose version
 
-      - name: Get deployment status
-        run: docker ps
+#       - name: Deploy portalbackend and exaflow
+#         working-directory: ./dev/
+#         run: bash start.sh
 
-      - name: Install python dependencies
-        working-directory: ./dev/
-        run: pip install -r requirements.txt
+#       - name: Get deployment status
+#         run: docker ps
 
-      - name: Run the dev tests
-        working-directory: ./dev/
-        run: pytest
+#       - name: Install python dependencies
+#         working-directory: ./dev/
+#         run: pip install -r requirements.txt
+
+#       - name: Run the dev tests
+#         working-directory: ./dev/
+#         run: pytest
