@@ -7,10 +7,10 @@
 {{- end -}}
 
 {{- define "mip.instanceVersion" -}}
-{{- $frontend := default "" .Values.frontend.image.tag -}}
-{{- $backend := default "" .Values.portalbackend.image.tag -}}
+{{- $platform-ui := default "" .Values.platform-ui.image.tag -}}
+{{- $backend := default "" .Values.platform-backend.image.tag -}}
 {{- $exareme := default "" .Values.engines.exaflow.image.tag -}}
-{{- printf "Frontend: %s, Backend: %s, Exareme: %s" $frontend $backend $exareme -}}
+{{- printf "Platform-ui: %s, Backend: %s, Exareme: %s" $platform-ui $backend $exareme -}}
 {{- end -}}
 
 {{- define "mip.keycloak.enabled" -}}

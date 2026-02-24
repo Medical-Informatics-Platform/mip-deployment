@@ -1,7 +1,7 @@
 {{- $namespace := include "mip.namespace" . }}
-{{- $frontendDatacatalogProtocol := default .Values.datacatalog.protocol .Values.frontend.config.datacatalog.protocol -}}
-{{- $frontendDatacatalogHost := default .Values.datacatalog.host .Values.frontend.config.datacatalog.host -}}
-{{- $matomoEnabled := ternary "true" "false" (default false .Values.frontend.config.matomo.enabled) -}}
+{{- $platformUiDatacatalogProtocol := default .Values.datacatalog.protocol .Values.platform-ui.config.datacatalog.protocol -}}
+{{- $platformUiDatacatalogHost := default .Values.datacatalog.host .Values.platform-ui.config.datacatalog.host -}}
+{{- $matomoEnabled := ternary "true" "false" (default false .Values.platform-ui.config.matomo.enabled) -}}
 {{- $proxyForwarding := ternary "true" "false" (default true .Values.keycloak.proxyAddressForwarding) -}}
 {{- $authEnabled := default true .Values.keycloak.enabled -}}
 {{- $authFlag := ternary "1" "0" $authEnabled -}}
@@ -19,17 +19,17 @@ data:
   mip.EXTERNAL_PROTOCOL: {{ .Values.network.externalProtocol | quote }}
   mip.PUBLIC_PROTOCOL: {{ .Values.network.publicProtocol | quote }}
   mip.PUBLIC_HOST: {{ .Values.network.publicHost | quote }}
-  mip.FRONTEND_URL: {{ printf "%s://%s" .Values.network.publicProtocol .Values.network.publicHost | quote }}
+  mip.PLATFORM_UI_URL: {{ printf "%s://%s" .Values.network.publicProtocol .Values.network.publicHost | quote }}
 
-  portalbackend.LOG_LEVEL: {{ .Values.portalbackend.config.logLevel | quote }}
-  portalbackend.LOG_LEVEL_FRAMEWORK: {{ .Values.portalbackend.config.logLevelFramework | quote }}
-  portalbackend.ALGORITHM_UPDATE_INTERVAL: "{{ .Values.portalbackend.config.algorithmUpdateInterval }}"
+  platform-backend.LOG_LEVEL: {{ .Values.platform-backend.config.logLevel | quote }}
+  platform-backend.LOG_LEVEL_FRAMEWORK: {{ .Values.platform-backend.config.logLevelFramework | quote }}
+  platform-backend.ALGORITHM_UPDATE_INTERVAL: "{{ .Values.platform-backend.config.algorithmUpdateInterval }}"
 
-  frontend.ERROR_LOG_LEVEL: {{ .Values.frontend.config.errorLogLevel | quote }}
-  frontend.DATACATALOG_SERVER: {{ printf "%s://%s" $frontendDatacatalogProtocol $frontendDatacatalogHost | quote }}
-  frontend.MATOMO_ENABLED: "{{ $matomoEnabled }}"
-  frontend.MATOMO_URL: {{ default "" .Values.frontend.config.matomo.url | quote }}
-  frontend.MATOMO_SITE_ID: "{{ default "" .Values.frontend.config.matomo.siteId }}"
+  platform-ui.ERROR_LOG_LEVEL: {{ .Values.platform-ui.config.errorLogLevel | quote }}
+  platform-ui.DATACATALOG_SERVER: {{ printf "%s://%s" $platformUiDatacatalogProtocol $platformUiDatacatalogHost | quote }}
+  platform-ui.MATOMO_ENABLED: "{{ $matomoEnabled }}"
+  platform-ui.MATOMO_URL: {{ default "" .Values.platform-ui.config.matomo.url | quote }}
+  platform-ui.MATOMO_SITE_ID: "{{ default "" .Values.platform-ui.config.matomo.siteId }}"
 
   keycloak.AUTHENTICATION: "{{ $authFlag }}"
   keycloak.HOSTNAME: {{ include "mip.keycloak.host" . | quote }}

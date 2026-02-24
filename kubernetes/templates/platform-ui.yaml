@@ -2,65 +2,65 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: platform-ui
   namespace: {{ $namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: platform-ui
   template:
     metadata:
       labels:
-        app: frontend
+        app: platform-ui
     spec:
       containers:
-      - name: frontend
-        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+      - name: platform-ui
+        image: "{{ .Values.platform-ui.image.repository }}:{{ .Values.platform-ui.image.tag }}"
         ports:
         - containerPort: 80
-        {{- $backendHost := default "" .Values.frontend.backend.host -}}
+        {{- $backendHost := default "" .Values.platform-ui.backend.host -}}
         {{- if $backendHost }}
-        - name: PORTAL_BACKEND_SERVER
-          value: {{ printf "%s:%v" $backendHost (default 8080 .Values.frontend.backend.port) | quote }}
-        - name: PORTAL_BACKEND_CONTEXT
-          value: {{ default "services" .Values.frontend.backend.context | quote }}
+        - name: PLATFORM_BACKEND_SERVER
+          value: {{ printf "%s:%v" $backendHost (default 8080 .Values.platform-ui.backend.port) | quote }}
+        - name: PLATFORM_BACKEND_CONTEXT
+          value: {{ default "services" .Values.platform-ui.backend.context | quote }}
         {{- end }}
         {{- end }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: platform-ui
   namespace: {{ $namespace }}
 spec:
   selector:
-    app: frontend
+    app: platform-ui
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
   {{- if not .Values.cluster.managed }}
   type: NodePort
-  {{- if .Values.frontend.service.nodePort }}
-  nodePort: {{ .Values.frontend.service.nodePort }}
+  {{- if .Values.platform-ui.service.nodePort }}
+  nodePort: {{ .Values.platform-ui.service.nodePort }}
   {{- end }}
   {{- end }}
-{{- $ingressEnabled := and (default true .Values.network.ingress.enabled) (default true .Values.frontend.ingress.enabled) -}}
+{{- $ingressEnabled := and (default true .Values.network.ingress.enabled) (default true .Values.platform-ui.ingress.enabled) -}}
 {{- if and $ingressEnabled (not (empty .Values.network.publicHost)) }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend-ingress
+  name: platform-ui-ingress
   namespace: {{ $namespace }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.frontend.ingress.className | default "nginx" }}
-    {{- if .Values.frontend.ingress.certManagerClusterIssuer }}
-    cert-manager.io/cluster-issuer: {{ .Values.frontend.ingress.certManagerClusterIssuer }}
+    kubernetes.io/ingress.class: {{ .Values.platform-ui.ingress.className | default "nginx" }}
+    {{- if .Values.platform-ui.ingress.certManagerClusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.platform-ui.ingress.certManagerClusterIssuer }}
     {{- end }}
     nginx.ingress.kubernetes.io/rewrite-target: /
-    {{- $redirect := .Values.frontend.ingress.redirectRootTo | default "" }}
+    {{- $redirect := .Values.platform-ui.ingress.redirectRootTo | default "" }}
     {{- if $redirect }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($request_uri = "/") {
@@ -68,7 +68,7 @@ metadata:
       }
     {{- end }}
 spec:
-  ingressClassName: {{ .Values.frontend.ingress.className | default "nginx" }}
+  ingressClassName: {{ .Values.platform-ui.ingress.className | default "nginx" }}
   {{- if and .Values.network.ingress.tlsSecretName (not (empty .Values.network.publicHost)) }}
   tls:
     - hosts:
@@ -83,7 +83,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: platform-ui
                 port:
                   number: 80
 {{- end }}

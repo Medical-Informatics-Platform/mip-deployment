@@ -8,7 +8,7 @@ The data that need to be persisted are located ONLY in the central node.
 The volumes that are created in the host machine, are listed in the [storage data paths section of the `values.yaml` file](../kubernetes/values.yaml).
 
 The folders that currently need to be backed up are the following:
-1. The portal-backend stored data under `/opt/mip-deployment/.stored_data`
+1. The platform-backend stored data under `/opt/mip-deployment/.stored_data`
 2. The config folder under `/opt/mip-deployment/config`
 
 ### Backup

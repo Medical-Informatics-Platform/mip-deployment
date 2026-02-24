@@ -1,23 +1,23 @@
 {{- $namespace := include "mip.namespace" . }}
 {{- if not .Values.cluster.managed }}
 ---
-# 1) portalbackend DB data on hostPath
+# 1) platform-backend DB data on hostPath
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: portalbackend-db-vol0
+  name: platform-backend-db-vol0
   labels:
-    storage: portalbackend-db-storage0
+    storage: platform-backend-db-storage0
 spec:
   capacity:
-    storage: {{ .Values.portalbackendDatabase.persistence.size }}
+    storage: {{ .Values.platformBackendDatabase.persistence.size }}
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Delete
   storageClassName: {{ .Values.cluster.storageClasses.local }}
   hostPath:
-    path: {{ .Values.portalbackendDatabase.persistence.localPath }}
+    path: {{ .Values.platformBackendDatabase.persistence.localPath }}
     type: DirectoryOrCreate
   nodeAffinity:
     required:
@@ -31,39 +31,39 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: portalbackend-db-claim0
+  name: platform-backend-db-claim0
   namespace: {{ $namespace }}
   labels:
-    storage: portalbackend-db-storage0
+    storage: platform-backend-db-storage0
 spec:
   selector:
     matchLabels:
-      storage: portalbackend-db-storage0
+      storage: platform-backend-db-storage0
   storageClassName: {{ .Values.cluster.storageClasses.local }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.portalbackendDatabase.persistence.size }}
+      storage: {{ .Values.platformBackendDatabase.persistence.size }}
 
 ---
-# 2) portalbackend config/storage on hostPath
+# 2) platform-backend config/storage on hostPath
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: portalbackend-storage-vol0
+  name: platform-backend-storage-vol0
   labels:
-    storage: portalbackend-storage0
+    storage: platform-backend-storage0
 spec:
   capacity:
-    storage: {{ .Values.portalbackend.persistence.data.size }}
+    storage: {{ .Values.platform-backend.persistence.data.size }}
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Delete
   storageClassName: {{ .Values.cluster.storageClasses.local }}
   hostPath:
-    path: {{ .Values.portalbackend.persistence.data.localPath }}
+    path: {{ .Values.platform-backend.persistence.data.localPath }}
     type: DirectoryOrCreate
   nodeAffinity:
     required:
@@ -77,39 +77,39 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: portalbackend-claim0
+  name: platform-backend-claim0
   namespace: {{ $namespace }}
   labels:
-    storage: portalbackend-storage0
+    storage: platform-backend-storage0
 spec:
   selector:
     matchLabels:
-      storage: portalbackend-storage0
+      storage: platform-backend-storage0
   storageClassName: {{ .Values.cluster.storageClasses.local }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.portalbackend.persistence.data.size }}
+      storage: {{ .Values.platform-backend.persistence.data.size }}
 
 ---
-# 3) portalbackend logs on hostPath
+# 3) platform-backend logs on hostPath
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: portalbackend-logs-vol0
+  name: platform-backend-logs-vol0
   labels:
-    storage: portalbackend-logs-storage0
+    storage: platform-backend-logs-storage0
 spec:
   capacity:
-    storage: {{ .Values.portalbackend.persistence.logs.size }}
+    storage: {{ .Values.platform-backend.persistence.logs.size }}
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ .Values.cluster.storageClasses.local }}
   hostPath:
-    path: {{ .Values.portalbackend.persistence.logs.localPath }}
+    path: {{ .Values.platform-backend.persistence.logs.localPath }}
     type: DirectoryOrCreate
   nodeAffinity:
     required:
@@ -123,27 +123,27 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: portalbackend-logs-claim0
+  name: platform-backend-logs-claim0
   namespace: {{ $namespace }}
   labels:
-    storage: portalbackend-logs-storage0
+    storage: platform-backend-logs-storage0
 spec:
   selector:
     matchLabels:
-      storage: portalbackend-logs-storage0
+      storage: platform-backend-logs-storage0
   storageClassName: {{ .Values.cluster.storageClasses.local }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.portalbackend.persistence.logs.size }}
+      storage: {{ .Values.platform-backend.persistence.logs.size }}
 {{- else }}
 ---
 # managed cluster: only dynamic PVCs on CephFS
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: portalbackend-db-claim0
+  name: platform-backend-db-claim0
   namespace: {{ $namespace }}
   annotations:
     # tells Argo CD: do not prune (delete) this resource
@@ -154,12 +154,12 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.portalbackendDatabase.persistence.size }}
+      storage: {{ .Values.platformBackendDatabase.persistence.size }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: portalbackend-claim0
+  name: platform-backend-claim0
   namespace: {{ $namespace }}
   annotations:
     # tells Argo CD: do not prune (delete) this resource
@@ -170,12 +170,12 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.portalbackend.persistence.data.size }}
+      storage: {{ .Values.platform-backend.persistence.data.size }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: portalbackend-logs-claim0
+  name: platform-backend-logs-claim0
   namespace: {{ $namespace }}
   annotations:
     # tells Argo CD: do not prune (delete) this resource
@@ -186,7 +186,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.portalbackend.persistence.logs.size }}
+      storage: {{ .Values.platform-backend.persistence.logs.size }}
 {{- end }}
 
 ---
@@ -194,24 +194,24 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: portalbackend-db-init
+  name: platform-backend-db-init
   namespace: {{ $namespace }}
 data:
-  10-bootstrap-portal-db.sh: |
+  10-bootstrap-platform-db.sh: |
     #!/bin/sh
     set -eu
 
-    PORTAL_DB_NAME="${PORTAL_DB_NAME:-portal}"
+    PLATFORM_DB_NAME="${PLATFORM_DB_NAME:-portal}"
     ADMIN_DB="${POSTGRES_DB:-postgres}"
 
-    if [ -z "${PORTAL_DB_USER:-}" ] || [ -z "${PORTAL_DB_PASSWORD:-}" ]; then
-      echo "portal DB credentials missing; skipping bootstrap" >&2
+    if [ -z "${PLATFORM_DB_USER:-}" ] || [ -z "${PLATFORM_DB_PASSWORD:-}" ]; then
+      echo "platform DB credentials missing; skipping bootstrap" >&2
       exit 0
     fi
 
-    PORTAL_DB_NAME_ESC=$(printf "%s" "${PORTAL_DB_NAME}" | sed "s/'/''/g")
-    PORTAL_DB_USER_ESC=$(printf "%s" "${PORTAL_DB_USER}" | sed "s/'/''/g")
-    PORTAL_DB_PASSWORD_ESC=$(printf "%s" "${PORTAL_DB_PASSWORD}" | sed "s/'/''/g")
+    PLATFORM_DB_NAME_ESC=$(printf "%s" "${PLATFORM_DB_NAME}" | sed "s/'/''/g")
+    PLATFORM_DB_USER_ESC=$(printf "%s" "${PLATFORM_DB_USER}" | sed "s/'/''/g")
+    PLATFORM_DB_PASSWORD_ESC=$(printf "%s" "${PLATFORM_DB_PASSWORD}" | sed "s/'/''/g")
 
     export PGPASSWORD="${POSTGRES_PASSWORD:-}"
 
@@ -220,16 +220,16 @@ data:
       sleep 2
     done
 
-    DB_EXISTS=$(psql --username "${POSTGRES_USER}" --dbname "${ADMIN_DB}" -tAc "SELECT 1 FROM pg_database WHERE datname='${PORTAL_DB_NAME_ESC}'" || true)
+    DB_EXISTS=$(psql --username "${POSTGRES_USER}" --dbname "${ADMIN_DB}" -tAc "SELECT 1 FROM pg_database WHERE datname='${PLATFORM_DB_NAME_ESC}'" || true)
 
     if [ "${DB_EXISTS}" != "1" ]; then
-      echo "Creating database ${PORTAL_DB_NAME}"
-      createdb --username "${POSTGRES_USER}" --host 127.0.0.1 --port "${POSTGRES_PORT:-5432}" "${PORTAL_DB_NAME}"
+      echo "Creating database ${PLATFORM_DB_NAME}"
+      createdb --username "${POSTGRES_USER}" --host 127.0.0.1 --port "${POSTGRES_PORT:-5432}" "${PLATFORM_DB_NAME}"
     else
-      echo "Database ${PORTAL_DB_NAME} already exists"
+      echo "Database ${PLATFORM_DB_NAME} already exists"
     fi
 
-    echo "Ensuring role ${PORTAL_DB_USER} exists (with SUPERUSER)"
+    echo "Ensuring role ${PLATFORM_DB_USER} exists (with SUPERUSER)"
     psql -v ON_ERROR_STOP=1 \
       --username "${POSTGRES_USER}" \
       --dbname "${ADMIN_DB}" \
@@ -237,18 +237,18 @@ data:
       --port "${POSTGRES_PORT:-5432}" <<EOFSQL
     DO \$\$
     DECLARE
-      portal_user text := '${PORTAL_DB_USER_ESC}';
-      portal_password text := '${PORTAL_DB_PASSWORD_ESC}';
+      platform_user text := '${PLATFORM_DB_USER_ESC}';
+      platform_password text := '${PLATFORM_DB_PASSWORD_ESC}';
     BEGIN
-      IF portal_user IS NULL OR portal_user = '' THEN
-        RAISE NOTICE 'PORTAL_DB_USER empty, skipping portal bootstrap';
+      IF platform_user IS NULL OR platform_user = '' THEN
+        RAISE NOTICE 'PLATFORM_DB_USER empty, skipping platform bootstrap';
         RETURN;
       END IF;
 
-      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = portal_user) THEN
-        EXECUTE format('CREATE ROLE %I SUPERUSER LOGIN PASSWORD %L', portal_user, portal_password);
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = platform_user) THEN
+        EXECUTE format('CREATE ROLE %I SUPERUSER LOGIN PASSWORD %L', platform_user, platform_password);
       ELSE
-        EXECUTE format('ALTER ROLE %I WITH SUPERUSER LOGIN PASSWORD %L', portal_user, portal_password);
+        EXECUTE format('ALTER ROLE %I WITH SUPERUSER LOGIN PASSWORD %L', platform_user, platform_password);
       END IF;
     END;
     \$\$;
@@ -261,36 +261,36 @@ data:
       --port "${POSTGRES_PORT:-5432}" <<EOFSQL
     DO \$\$
     DECLARE
-      portal_db text := '${PORTAL_DB_NAME_ESC}';
-      portal_user text := '${PORTAL_DB_USER_ESC}';
+      platform_db text := '${PLATFORM_DB_NAME_ESC}';
+      platform_user text := '${PLATFORM_DB_USER_ESC}';
     BEGIN
-      IF portal_user IS NULL OR portal_user = '' THEN
+      IF platform_user IS NULL OR platform_user = '' THEN
         RETURN;
       END IF;
 
-      EXECUTE format('ALTER DATABASE %I OWNER TO %I', portal_db, portal_user);
-      EXECUTE format('REVOKE ALL ON DATABASE %I FROM PUBLIC', portal_db);
-      EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', portal_db, portal_user);
+      EXECUTE format('ALTER DATABASE %I OWNER TO %I', platform_db, platform_user);
+      EXECUTE format('REVOKE ALL ON DATABASE %I FROM PUBLIC', platform_db);
+      EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', platform_db, platform_user);
     END;
     \$\$;
     EOFSQL
 
     psql -v ON_ERROR_STOP=1 \
       --username "${POSTGRES_USER}" \
-      --dbname "${PORTAL_DB_NAME}" \
+      --dbname "${PLATFORM_DB_NAME}" \
       --host 127.0.0.1 \
       --port "${POSTGRES_PORT:-5432}" <<EOFSQL
     DO \$\$
     DECLARE
-      portal_user text := '${PORTAL_DB_USER_ESC}';
+      platform_user text := '${PLATFORM_DB_USER_ESC}';
     BEGIN
-      IF portal_user IS NULL OR portal_user = '' THEN
+      IF platform_user IS NULL OR platform_user = '' THEN
         RETURN;
       END IF;
 
-      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO %I', portal_user);
-      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO %I', portal_user);
-      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO %I', portal_user);
+      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO %I', platform_user);
+      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO %I', platform_user);
+      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO %I', platform_user);
     END;
     \$\$;
     EOFSQL
@@ -300,51 +300,51 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: portalbackend
+  name: platform-backend
   namespace: {{ $namespace }}
   labels:
-    app: portalbackend
+    app: platform-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: portalbackend
+      app: platform-backend
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: portalbackend
+        app: platform-backend
     spec:
       {{ if not .Values.cluster.managed }}
       nodeSelector:
         master: "true"
       {{ end }}
-      hostname: portalbackend
+      hostname: platform-backend
       volumes:
-      - name: portalbackend-db-claim0
+      - name: platform-backend-db-claim0
         persistentVolumeClaim:
-          claimName: portalbackend-db-claim0
-      - name: portalbackend-claim0
+          claimName: platform-backend-db-claim0
+      - name: platform-backend-claim0
         persistentVolumeClaim:
-          claimName: portalbackend-claim0
-      - name: portalbackend-logs-claim0
+          claimName: platform-backend-claim0
+      - name: platform-backend-logs-claim0
         persistentVolumeClaim:
-          claimName: portalbackend-logs-claim0
-      - name: portalbackend-db-init
+          claimName: platform-backend-logs-claim0
+      - name: platform-backend-db-init
         configMap:
-          name: portalbackend-db-init
+          name: platform-backend-db-init
           defaultMode: 0755
       containers:
-      - name: portalbackend-db
-        image: {{ .Values.portalbackendDatabase.image.repository }}:{{ .Values.portalbackendDatabase.image.tag }}
+      - name: platform-backend-db
+        image: {{ .Values.platformBackendDatabase.image.repository }}:{{ .Values.platformBackendDatabase.image.tag }}
         ports:
         - containerPort: 5432
         volumeMounts:
-        - name: portalbackend-db-claim0
+        - name: platform-backend-db-claim0
           mountPath: /var/lib/postgresql/data
-        - name: portalbackend-db-init
-          mountPath: /opt/portalbackend-db-init
+        - name: platform-backend-db-init
+          mountPath: /opt/platform-backend-db-init
           readOnly: true
         args:
         - -p
@@ -356,82 +356,82 @@ spec:
           valueFrom:
             secretKeyRef:
               name: mip-secret
-              key: portalbackend-db.DB_ADMIN_USER
+              key: platform-backend-db.DB_ADMIN_USER
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mip-secret
-              key: portalbackend-db.DB_ADMIN_PASSWORD
-        - name: PORTAL_DB_NAME
+              key: platform-backend-db.DB_ADMIN_PASSWORD
+        - name: PLATFORM_DB_NAME
           value: portal
-        - name: PORTAL_DB_USER
+        - name: PLATFORM_DB_USER
           valueFrom:
             secretKeyRef:
               name: mip-secret
-              key: portalbackend-db.PORTAL_DB_USER
-        - name: PORTAL_DB_PASSWORD
+              key: platform-backend-db.PLATFORM_DB_USER
+        - name: PLATFORM_DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mip-secret
-              key: portalbackend-db.PORTAL_DB_PASSWORD
+              key: platform-backend-db.PLATFORM_DB_PASSWORD
         lifecycle:
           postStart:
             exec:
               command:
               - /bin/sh
               - -c
-              - /opt/portalbackend-db-init/10-bootstrap-portal-db.sh
+              - /opt/platform-backend-db-init/10-bootstrap-platform-db.sh
 
-      - name: portalbackend
-        image: {{ .Values.portalbackend.image.repository }}:{{ .Values.portalbackend.image.tag }}
+      - name: platform-backend
+        image: {{ .Values.platform-backend.image.repository }}:{{ .Values.platform-backend.image.tag }}
         ports:
         - containerPort: 8080
         - containerPort: 8089
         volumeMounts:
-        - name: portalbackend-claim0
-          mountPath: /opt/portal/api
-        - name: portalbackend-logs-claim0
-          mountPath: /var/log/portalbackend
+        - name: platform-backend-claim0
+          mountPath: /opt/platform/api
+        - name: platform-backend-logs-claim0
+          mountPath: /var/log/platform-backend
         env:
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
               name: mip-config
-              key: portalbackend.LOG_LEVEL
+              key: platform-backend.LOG_LEVEL
         - name: LOG_LEVEL_FRAMEWORK
           valueFrom:
             configMapKeyRef:
               name: mip-config
-              key: portalbackend.LOG_LEVEL_FRAMEWORK
+              key: platform-backend.LOG_LEVEL_FRAMEWORK
         - name: AUTHENTICATION
           valueFrom:
             configMapKeyRef:
               name: mip-config
               key: keycloak.AUTHENTICATION
-        - name: PORTAL_DB_URL
+        - name: PLATFORM_DB_URL
           value: jdbc:postgresql://localhost:5432/portal
-        - name: PORTAL_DB_SERVER
+        - name: PLATFORM_DB_SERVER
           value: localhost:5432
-        - name: PORTAL_DB_USER
+        - name: PLATFORM_DB_USER
           valueFrom:
             secretKeyRef:
               name: mip-secret
-              key: portalbackend-db.PORTAL_DB_USER
-        - name: PORTAL_DB_PASSWORD
+              key: platform-backend-db.PLATFORM_DB_USER
+        - name: PLATFORM_DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mip-secret
-              key: portalbackend-db.PORTAL_DB_PASSWORD
+              key: platform-backend-db.PLATFORM_DB_PASSWORD
         - name: EXAFLOW_URL
           valueFrom:
             configMapKeyRef:
               name: mip-config
               key: engines.exaflow.URL
-        - name: FRONTEND_BASE_URL
+        - name: PLATFORM_UI_BASE_URL
           valueFrom:
             configMapKeyRef:
               name: mip-config
-              key: mip.FRONTEND_URL
+              key: mip.PLATFORM_UI_URL
         - name: KEYCLOAK_AUTH_URL
           valueFrom:
             configMapKeyRef:
@@ -461,19 +461,19 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: mip-config
-              key: portalbackend.ALGORITHM_UPDATE_INTERVAL
+              key: platform-backend.ALGORITHM_UPDATE_INTERVAL
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: portalbackend-service
+  name: platform-backend-service
   namespace: {{ $namespace }}
   labels:
-    app: portalbackend
+    app: platform-backend
 spec:
   selector:
-    app: portalbackend
+    app: platform-backend
   ports:
   - name: "5432"
     port: 5432
@@ -481,9 +481,9 @@ spec:
   - name: "8080"
     port: 8080
     targetPort: 8080
-  {{- if .Values.portalbackend.service.exposeDebug.enabled }}
+  {{- if .Values.platform-backend.service.exposeDebug.enabled }}
   type: LoadBalancer
-  {{- $debugIP := default .Values.network.externalIP .Values.portalbackend.service.exposeDebug.externalIP }}
+  {{- $debugIP := default .Values.network.externalIP .Values.platform-backend.service.exposeDebug.externalIP }}
   {{- if $debugIP }}
   externalIPs:
   - {{ $debugIP }}
