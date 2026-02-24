@@ -1,6 +1,5 @@
 #!/bin/env bash
 set -a
-source ./.versions_env
 source ./.env
 set +a
 
