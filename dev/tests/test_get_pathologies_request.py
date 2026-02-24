@@ -4,7 +4,7 @@ import requests
 
 
 def test_get_pathologies_request():
-    url = "http://172.17.0.1:8080/services/pathologies"
+    url = "http://172.17.0.1:8080/services/data-models"
     headers = {"Content-type": "application/json", "Accept": "application/json"}
     response = requests.get(url, headers=headers)
     assert response.status_code == 200
@@ -19,13 +19,14 @@ def test_get_pathologies_request():
     assert all(
         len(pathology["datasets"]) in [1, 1, 3, 1] for pathology in pathologies
     )
-
+    for pathology in pathologies:
+        print(f"Pathology: {pathology["variables"]=}")
     assert all(
-        count_datasets_from_cdes(pathology["metadataHierarchy"]) in [1, 1, 3, 1] for pathology in pathologies
+        count_datasets_from_cdes(pathology) in [1, 1, 3, 1] for pathology in pathologies
     )
 
     assert all(
-        count_cdes(pathology["metadataHierarchy"]) in [20, 185, 184, 191] for pathology in pathologies
+        count_cdes(pathology) in [20, 185, 184, 191] for pathology in pathologies
     )
 
 
