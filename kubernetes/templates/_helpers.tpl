@@ -7,10 +7,10 @@
 {{- end -}}
 
 {{- define "mip.instanceVersion" -}}
-{{- $platform-ui := default "" .Values.platform-ui.image.tag -}}
-{{- $backend := default "" .Values.platform-backend.image.tag -}}
-{{- $exareme := default "" .Values.engines.exaflow.image.tag -}}
-{{- printf "Platform-ui: %s, Backend: %s, Exareme: %s" $platform-ui $backend $exareme -}}
+{{- $platformUi := default "" (index .Values "platform-ui").image.tag -}}
+{{- $platformBackend := default "" (index .Values "platform-backend").image.tag -}}
+{{- $exaflow := default "" .Values.engines.exaflow.image.tag -}}
+{{- printf "Platform-ui: %s, Backend: %s, Exaflow: %s" $platformUi $platformBackend $exaflow -}}
 {{- end -}}
 
 {{- define "mip.keycloak.enabled" -}}

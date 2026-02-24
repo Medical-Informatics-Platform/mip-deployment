@@ -1,4 +1,7 @@
-{{- $namespace := include "mip.namespace" . }}
+{{- $namespace := include "mip.namespace" . -}}
+{{- $platformBackend := index .Values "platform-backend" -}}
+{{- $localStorageClass := .Values.cluster.storageClasses.local -}}
+{{- $managedStorageClass := .Values.cluster.storageClasses.managed -}}
 {{- if not .Values.cluster.managed }}
 ---
 # 1) platform-backend DB data on hostPath
@@ -15,7 +18,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.cluster.storageClasses.local }}
+  storageClassName: {{ $localStorageClass }}
   hostPath:
     path: {{ .Values.platformBackendDatabase.persistence.localPath }}
     type: DirectoryOrCreate
@@ -39,7 +42,7 @@ spec:
   selector:
     matchLabels:
       storage: platform-backend-db-storage0
-  storageClassName: {{ .Values.cluster.storageClasses.local }}
+  storageClassName: {{ $localStorageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
@@ -56,14 +59,14 @@ metadata:
     storage: platform-backend-storage0
 spec:
   capacity:
-    storage: {{ .Values.platform-backend.persistence.data.size }}
+    storage: {{ $platformBackend.persistence.data.size }}
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.cluster.storageClasses.local }}
+  storageClassName: {{ $localStorageClass }}
   hostPath:
-    path: {{ .Values.platform-backend.persistence.data.localPath }}
+    path: {{ $platformBackend.persistence.data.localPath }}
     type: DirectoryOrCreate
   nodeAffinity:
     required:
@@ -85,12 +88,12 @@ spec:
   selector:
     matchLabels:
       storage: platform-backend-storage0
-  storageClassName: {{ .Values.cluster.storageClasses.local }}
+  storageClassName: {{ $localStorageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.platform-backend.persistence.data.size }}
+      storage: {{ $platformBackend.persistence.data.size }}
 
 ---
 # 3) platform-backend logs on hostPath
@@ -102,14 +105,14 @@ metadata:
     storage: platform-backend-logs-storage0
 spec:
   capacity:
-    storage: {{ .Values.platform-backend.persistence.logs.size }}
+    storage: {{ $platformBackend.persistence.logs.size }}
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.cluster.storageClasses.local }}
+  storageClassName: {{ $localStorageClass }}
   hostPath:
-    path: {{ .Values.platform-backend.persistence.logs.localPath }}
+    path: {{ $platformBackend.persistence.logs.localPath }}
     type: DirectoryOrCreate
   nodeAffinity:
     required:
@@ -131,12 +134,12 @@ spec:
   selector:
     matchLabels:
       storage: platform-backend-logs-storage0
-  storageClassName: {{ .Values.cluster.storageClasses.local }}
+  storageClassName: {{ $localStorageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.platform-backend.persistence.logs.size }}
+      storage: {{ $platformBackend.persistence.logs.size }}
 {{- else }}
 ---
 # managed cluster: only dynamic PVCs on CephFS
@@ -149,7 +152,7 @@ metadata:
     # tells Argo CD: do not prune (delete) this resource
     argocd.argoproj.io/sync-options: Delete=false,Prune=false
 spec:
-  storageClassName: {{ .Values.cluster.storageClasses.managed }}
+  storageClassName: {{ $managedStorageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
@@ -165,12 +168,12 @@ metadata:
     # tells Argo CD: do not prune (delete) this resource
     argocd.argoproj.io/sync-options: Delete=false,Prune=false
 spec:
-  storageClassName: {{ .Values.cluster.storageClasses.managed }}
+  storageClassName: {{ $managedStorageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.platform-backend.persistence.data.size }}
+      storage: {{ $platformBackend.persistence.data.size }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -181,12 +184,12 @@ metadata:
     # tells Argo CD: do not prune (delete) this resource
     argocd.argoproj.io/sync-options: Delete=false,Prune=false
 spec:
-  storageClassName: {{ .Values.cluster.storageClasses.managed }}
+  storageClassName: {{ $managedStorageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.platform-backend.persistence.logs.size }}
+      storage: {{ $platformBackend.persistence.logs.size }}
 {{- end }}
 
 ---
@@ -316,152 +319,152 @@ spec:
       labels:
         app: platform-backend
     spec:
-      {{ if not .Values.cluster.managed }}
+{{- if not .Values.cluster.managed }}
       nodeSelector:
         master: "true"
-      {{ end }}
+{{- end }}
       hostname: platform-backend
       volumes:
-      - name: platform-backend-db-claim0
-        persistentVolumeClaim:
-          claimName: platform-backend-db-claim0
-      - name: platform-backend-claim0
-        persistentVolumeClaim:
-          claimName: platform-backend-claim0
-      - name: platform-backend-logs-claim0
-        persistentVolumeClaim:
-          claimName: platform-backend-logs-claim0
-      - name: platform-backend-db-init
-        configMap:
-          name: platform-backend-db-init
-          defaultMode: 0755
-      containers:
-      - name: platform-backend-db
-        image: {{ .Values.platformBackendDatabase.image.repository }}:{{ .Values.platformBackendDatabase.image.tag }}
-        ports:
-        - containerPort: 5432
-        volumeMounts:
         - name: platform-backend-db-claim0
-          mountPath: /var/lib/postgresql/data
-        - name: platform-backend-db-init
-          mountPath: /opt/platform-backend-db-init
-          readOnly: true
-        args:
-        - -p
-        - "5432"
-        env:
-        - name: POSTGRES_DB
-          value: postgres
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: mip-secret
-              key: platform-backend-db.DB_ADMIN_USER
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mip-secret
-              key: platform-backend-db.DB_ADMIN_PASSWORD
-        - name: PLATFORM_DB_NAME
-          value: portal
-        - name: PLATFORM_DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: mip-secret
-              key: platform-backend-db.PLATFORM_DB_USER
-        - name: PLATFORM_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mip-secret
-              key: platform-backend-db.PLATFORM_DB_PASSWORD
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - /bin/sh
-              - -c
-              - /opt/platform-backend-db-init/10-bootstrap-platform-db.sh
-
-      - name: platform-backend
-        image: {{ .Values.platform-backend.image.repository }}:{{ .Values.platform-backend.image.tag }}
-        ports:
-        - containerPort: 8080
-        - containerPort: 8089
-        volumeMounts:
+          persistentVolumeClaim:
+            claimName: platform-backend-db-claim0
         - name: platform-backend-claim0
-          mountPath: /opt/platform/api
+          persistentVolumeClaim:
+            claimName: platform-backend-claim0
         - name: platform-backend-logs-claim0
-          mountPath: /var/log/platform-backend
-        env:
-        - name: LOG_LEVEL
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: platform-backend.LOG_LEVEL
-        - name: LOG_LEVEL_FRAMEWORK
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: platform-backend.LOG_LEVEL_FRAMEWORK
-        - name: AUTHENTICATION
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: keycloak.AUTHENTICATION
-        - name: PLATFORM_DB_URL
-          value: jdbc:postgresql://localhost:5432/portal
-        - name: PLATFORM_DB_SERVER
-          value: localhost:5432
-        - name: PLATFORM_DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: mip-secret
-              key: platform-backend-db.PLATFORM_DB_USER
-        - name: PLATFORM_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mip-secret
-              key: platform-backend-db.PLATFORM_DB_PASSWORD
-        - name: EXAFLOW_URL
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: engines.exaflow.URL
-        - name: PLATFORM_UI_BASE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: mip.PLATFORM_UI_URL
-        - name: KEYCLOAK_AUTH_URL
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: keycloak.AUTH_URL
-        - name: KEYCLOAK_REALM
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: keycloak.REALM
-        - name: KEYCLOAK_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-credentials
-              key: client-id
-        - name: KEYCLOAK_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-credentials
-              key: client-secret
-#        - name: KEYCLOAK_SSL_REQUIRED
-#          valueFrom:
-#            configMapKeyRef:
-#              name: mip-config
-#              key: keycloak.SSL_REQUIRED
-        - name: ALGORITHM_UPDATE_INTERVAL
-          valueFrom:
-            configMapKeyRef:
-              name: mip-config
-              key: platform-backend.ALGORITHM_UPDATE_INTERVAL
+          persistentVolumeClaim:
+            claimName: platform-backend-logs-claim0
+        - name: platform-backend-db-init
+          configMap:
+            name: platform-backend-db-init
+            defaultMode: 0755
+      containers:
+        - name: platform-backend-db
+          image: {{ .Values.platformBackendDatabase.image.repository }}:{{ .Values.platformBackendDatabase.image.tag }}
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: platform-backend-db-claim0
+              mountPath: /var/lib/postgresql/data
+            - name: platform-backend-db-init
+              mountPath: /opt/platform-backend-db-init
+              readOnly: true
+          args:
+            - -p
+            - "5432"
+          env:
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mip-secret
+                  key: platform-backend-db.DB_ADMIN_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mip-secret
+                  key: platform-backend-db.DB_ADMIN_PASSWORD
+            - name: PLATFORM_DB_NAME
+              value: portal
+            - name: PLATFORM_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mip-secret
+                  key: platform-backend-db.PLATFORM_DB_USER
+            - name: PLATFORM_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mip-secret
+                  key: platform-backend-db.PLATFORM_DB_PASSWORD
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - /opt/platform-backend-db-init/10-bootstrap-platform-db.sh
+
+        - name: platform-backend
+          image: {{ $platformBackend.image.repository }}:{{ $platformBackend.image.tag }}
+          ports:
+            - containerPort: 8080
+            - containerPort: 8089
+          volumeMounts:
+            - name: platform-backend-claim0
+              mountPath: /opt/platform/api
+            - name: platform-backend-logs-claim0
+              mountPath: /var/log/platform-backend
+          env:
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: platform-backend.LOG_LEVEL
+            - name: LOG_LEVEL_FRAMEWORK
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: platform-backend.LOG_LEVEL_FRAMEWORK
+            - name: AUTHENTICATION
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: keycloak.AUTHENTICATION
+            - name: PLATFORM_DB_URL
+              value: jdbc:postgresql://localhost:5432/portal
+            - name: PLATFORM_DB_SERVER
+              value: localhost:5432
+            - name: PLATFORM_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mip-secret
+                  key: platform-backend-db.PLATFORM_DB_USER
+            - name: PLATFORM_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mip-secret
+                  key: platform-backend-db.PLATFORM_DB_PASSWORD
+            - name: EXAFLOW_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: engines.exaflow.URL
+            - name: PLATFORM_UI_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: mip.PLATFORM_UI_URL
+            - name: KEYCLOAK_AUTH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: keycloak.AUTH_URL
+            - name: KEYCLOAK_REALM
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: keycloak.REALM
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: client-id
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-credentials
+                  key: client-secret
+            # - name: KEYCLOAK_SSL_REQUIRED
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: mip-config
+            #       key: keycloak.SSL_REQUIRED
+            - name: ALGORITHM_UPDATE_INTERVAL
+              valueFrom:
+                configMapKeyRef:
+                  name: mip-config
+                  key: platform-backend.ALGORITHM_UPDATE_INTERVAL
 
 ---
 apiVersion: v1
@@ -475,10 +478,9 @@ spec:
   selector:
     app: platform-backend
   ports:
-  - name: "5432"
-    port: 5432
-    targetPort: 5432
-  - name: "8080"
-    port: 8080
-    targetPort: 8080
-
+    - name: "5432"
+      port: 5432
+      targetPort: 5432
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
