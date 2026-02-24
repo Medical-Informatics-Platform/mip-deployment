@@ -1,4 +1,11 @@
-{{- $namespace := include "mip.namespace" . }}
+{{- $namespace := include "mip.namespace" . -}}
+{{- $platformUi := index .Values "platform-ui" -}}
+{{- $backendHost := default "" $platformUi.backend.host -}}
+{{- $backendPort := default 8080 $platformUi.backend.port -}}
+{{- $backendContext := default "services" $platformUi.backend.context -}}
+{{- $ingressEnabled := and (default true .Values.network.ingress.enabled) (default true $platformUi.ingress.enabled) -}}
+{{- $publicHost := default "" .Values.network.publicHost -}}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,18 +22,17 @@ spec:
         app: platform-ui
     spec:
       containers:
-      - name: platform-ui
-        image: "{{ .Values.platform-ui.image.repository }}:{{ .Values.platform-ui.image.tag }}"
-        ports:
-        - containerPort: 80
-        {{- $backendHost := default "" .Values.platform-ui.backend.host -}}
-        {{- if $backendHost }}
-        - name: PLATFORM_BACKEND_SERVER
-          value: {{ printf "%s:%v" $backendHost (default 8080 .Values.platform-ui.backend.port) | quote }}
-        - name: PLATFORM_BACKEND_CONTEXT
-          value: {{ default "services" .Values.platform-ui.backend.context | quote }}
-        {{- end }}
-        {{- end }}
+        - name: platform-ui
+          image: "{{ $platformUi.image.repository }}:{{ $platformUi.image.tag }}"
+          ports:
+            - containerPort: 80
+{{- if $backendHost }}
+          env:
+            - name: PLATFORM_BACKEND_SERVER
+              value: {{ printf "%s:%v" $backendHost $backendPort | quote }}
+            - name: PLATFORM_BACKEND_CONTEXT
+              value: {{ $backendContext | quote }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Service
@@ -40,14 +46,13 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
-  {{- if not .Values.cluster.managed }}
+{{- if not .Values.cluster.managed }}
   type: NodePort
-  {{- if .Values.platform-ui.service.nodePort }}
-  nodePort: {{ .Values.platform-ui.service.nodePort }}
-  {{- end }}
-  {{- end }}
-{{- $ingressEnabled := and (default true .Values.network.ingress.enabled) (default true .Values.platform-ui.ingress.enabled) -}}
-{{- if and $ingressEnabled (not (empty .Values.network.publicHost)) }}
+{{- if $platformUi.service.nodePort }}
+  nodePort: {{ $platformUi.service.nodePort }}
+{{- end }}
+{{- end }}
+{{- if and $ingressEnabled (not (empty $publicHost)) }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -55,28 +60,28 @@ metadata:
   name: platform-ui-ingress
   namespace: {{ $namespace }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.platform-ui.ingress.className | default "nginx" }}
-    {{- if .Values.platform-ui.ingress.certManagerClusterIssuer }}
-    cert-manager.io/cluster-issuer: {{ .Values.platform-ui.ingress.certManagerClusterIssuer }}
-    {{- end }}
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    {{- $redirect := .Values.platform-ui.ingress.redirectRootTo | default "" }}
-    {{- if $redirect }}
+    kubernetes.io/ingress.class: {{ default "nginx" $platformUi.ingress.className | quote }}
+{{- if $platformUi.ingress.certManagerClusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ $platformUi.ingress.certManagerClusterIssuer | quote }}
+{{- end }}
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
+{{- $redirect := default "" $platformUi.ingress.redirectRootTo -}}
+{{- if $redirect }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($request_uri = "/") {
         return 302 {{ $redirect }};
       }
-    {{- end }}
+{{- end }}
 spec:
-  ingressClassName: {{ .Values.platform-ui.ingress.className | default "nginx" }}
-  {{- if and .Values.network.ingress.tlsSecretName (not (empty .Values.network.publicHost)) }}
+  ingressClassName: {{ default "nginx" $platformUi.ingress.className | quote }}
+{{- if and .Values.network.ingress.tlsSecretName (not (empty $publicHost)) }}
   tls:
     - hosts:
-      - {{ .Values.network.publicHost }}
+        - {{ $publicHost }}
       secretName: {{ .Values.network.ingress.tlsSecretName }}
-  {{- end }}
+{{- end }}
   rules:
-    - host: {{ .Values.network.publicHost }}
+    - host: {{ $publicHost }}
       http:
         paths:
           - path: /
