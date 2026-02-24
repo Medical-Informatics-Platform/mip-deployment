@@ -481,11 +481,4 @@ spec:
   - name: "8080"
     port: 8080
     targetPort: 8080
-  {{- if .Values.platform-backend.service.exposeDebug.enabled }}
-  type: LoadBalancer
-  {{- $debugIP := default .Values.network.externalIP .Values.platform-backend.service.exposeDebug.externalIP }}
-  {{- if $debugIP }}
-  externalIPs:
-  - {{ $debugIP }}
-  {{- end }}
-  {{- end }}
+

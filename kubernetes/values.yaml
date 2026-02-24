@@ -67,10 +67,7 @@ platform-backend:
     logs:
       localPath: /opt/mip-deployment/logs
       size: 1Gi
-  service:
-    exposeDebug:
-      enabled: false
-      externalIP: ""
+
 platformBackendDatabase:
   image:
     repository: postgres
