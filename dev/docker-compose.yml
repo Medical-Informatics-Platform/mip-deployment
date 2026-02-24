@@ -114,11 +114,11 @@ services:
       default:
         ipv4_address: 172.28.0.12
 
-  portalbackend_db:
+  platform_backend_db:
     image: postgres:11.20-alpine
     volumes:
-      - ./.stored_data/portalbackenddb:/var/lib/postgresql/data
-    hostname: portalbackend_db
+      - ./.stored_data/platform_backenddb:/var/lib/postgresql/data
+    hostname: platform_backend_db
     environment:
       POSTGRES_PASSWORD: test
     command: -p 5433
@@ -129,9 +129,9 @@ services:
   create_dbs:
     image: hbpmip/create-databases:1.1.0
     depends_on:
-      - portalbackend_db
+      - platform_backend_db
     environment:
-      DB_HOST: portalbackend_db
+      DB_HOST: platform_backend_db
       DB_PORT: 5433
       DB_ADMIN_USER: postgres
       DB_ADMIN_PASSWORD: test
@@ -140,8 +140,8 @@ services:
       PASSWORD4: portalpwd
     restart: on-failure
 
-  portalbackend:
-    image: hbpmip/portal-backend:${PORTALBACKEND}
+  platform-backend:
+    image: hbpmip/platform-backend:${PLATFORM_BACKEND}
     ports:
       - '8080:8080'
       - '8089:8089'
@@ -154,10 +154,10 @@ services:
       LOG_LEVEL_FRAMEWORK: INFO
       FEDERATION: dementia
       ### Database ###
-      PORTAL_DB_URL: jdbc:postgresql://portalbackend_db:5433/portal
-      PORTAL_DB_SERVER: portalbackend_db:5433
-      PORTAL_DB_USER: portal
-      PORTAL_DB_PASSWORD: portalpwd
+      PLATFORM_DB_URL: jdbc:postgresql://platform_backend_db:5433/portal
+      PLATFORM_DB_SERVER: platform_backend_db:5433
+      PLATFORM_DB_USER: portal
+      PLATFORM_DB_PASSWORD: portalpwd
       ### Exaflow ###
       ALGORITHM_UPDATE_INTERVAL: 30     # seconds
       EXAFLOW_URL: http://exaflow_controller:5000
@@ -170,23 +170,23 @@ services:
       KEYCLOAK_CLIENT_SECRET: "${KEYCLOAK_CLIENT_SECRET}"
       KEYCLOAK_SSL_REQUIRED: "${KEYCLOAK_SSL_REQUIRED}"
     volumes:
-      - ./config:/opt/portal/api
+      - ./config:/opt/platform/api
     restart: unless-stopped
 
   platform_ui:
-    image: madgik/portal-frontend:${FRONTEND}
+    image: hbpmip/platform-ui:${FRONTEND}
     ports:
       - "80:80"
     environment:
-      PORTAL_BACKEND_SERVER: portalbackend:8080
-      PORTAL_BACKEND_CONTEXT: services
+      PLATFORM_BACKEND_SERVER: platform-backend:8080
+      PLATFORM_BACKEND_CONTEXT: services
       NOTEBOOK_ENABLED: 0
       FRONTEND_VERSION: "${FRONTEND}"
-      BACKEND_VERSION: "${PORTALBACKEND}"
+      BACKEND_VERSION: "${PLATFORM_BACKEND}"
       EXAFLOW_VERSION: "${EXAFLOW}"
       MIP_VERSION: "${MIP}"
     depends_on:
-      - portalbackend
+      - platform-backend
     restart: unless-stopped
 
 networks:

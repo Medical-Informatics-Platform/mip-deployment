@@ -103,7 +103,7 @@ def print_audit_entry(log_line):
     type=click.File("r"),
     default=stdin,
 )
-def show_portal_backend_audit_entries(logfile):
+def show_platform_backend_audit_entries(logfile):
     previous_chunk_remains = ""
     while logs_chunk := logfile.read(LOG_FILE_CHUNK_SIZE):
         logs_chunk = previous_chunk_remains + logs_chunk

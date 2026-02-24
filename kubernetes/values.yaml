@@ -14,7 +14,7 @@ network:
     enabled: true
     className: nginx-public
     certManagerClusterIssuer: letsencrypt-public
-    tlsSecretName: frontend-tls
+    tlsSecretName: platform-ui-tls
     redirectRootTo: /home
 engines:
   exaflow:
@@ -28,9 +28,9 @@ mip:
 datacatalog:
   protocol: https
   host: ""
-frontend:
+platform-ui:
   image:
-    repository: madgik/frontend
+    repository: madgik/platform-ui
     tag: 0.0.1
   service:
     nodePort: 30080
@@ -38,9 +38,9 @@ frontend:
     enabled: true
     className: nginx-public
     certManagerClusterIssuer: letsencrypt-public
-    tlsSecretName: frontend-tls
+    tlsSecretName: platform-ui-tls
   backend:
-    host: portalbackend-service
+    host: platform-backend-service
     port: 8080
     context: services
   config:
@@ -52,9 +52,9 @@ frontend:
       enabled: false
       url: ""
       siteId: ""
-portalbackend:
+platform-backend:
   image:
-    repository: hbpmip/portal-backend
+    repository: hbpmip/platform-backend
     tag: 9.0.0
   config:
     logLevel: INFO
@@ -71,12 +71,12 @@ portalbackend:
     exposeDebug:
       enabled: false
       externalIP: ""
-portalbackendDatabase:
+platformBackendDatabase:
   image:
     repository: postgres
     tag: 11.3-alpine
   persistence:
-    localPath: /opt/mip-deployment/.stored_data/portalbackenddb
+    localPath: /opt/mip-deployment/.stored_data/platform_backenddb
     size: 1Gi
 keycloak:
   enabled: true

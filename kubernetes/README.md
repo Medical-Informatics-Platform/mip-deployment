@@ -37,10 +37,10 @@ Now, with the Kubernetes (K8s) deployment, we have 2 main component packs, that 
 * [smpc-client](https://github.com/madgik/Exaflow/tree/master/exaflow)
 
 ### The web app stack:
-* [frontend](https://github.com/HBPMedical/portal-frontend): The "Web App" UI
-* [portalbackend](https://github.com/HBPMedical/portal-backend): The "Backend API" which supports the Web App
-    * Its database bootstrap script lives next to the application code (`config/scripts/bootstrap-portal-db.sh`) and the same script is vendored in this chart under `files/portalbackend-db-init.sh` so the deployment can mount it via ConfigMap without embedding a large shell block inside the template. Keeping both copies in sync lets the container image and the Helm release evolve together.
-* [portalbackend_db](https://github.com/docker-library/postgres): The portal backend's database
+* [platform-ui](https://github.com/HBPMedical/platform-ui): The "Web App" UI
+* [platform-backend](https://github.com/HBPMedical/platform-backend): The "Backend API" which supports the Web App
+    * Its database bootstrap script lives next to the application code (`config/scripts/bootstrap-portal-db.sh`) and the same script is vendored in this chart under `files/platform-backend-db-init.sh` so the deployment can mount it via ConfigMap without embedding a large shell block inside the template. Keeping both copies in sync lets the container image and the Helm release evolve together.
+* [platform_backend_db](https://github.com/docker-library/postgres): The platform-backend's database
 **External Keycloak**: Authentication is provided by an existing Keycloak realm; this chart only wires the configuration values so the UI stack can reach it.
 
 
@@ -55,7 +55,7 @@ Prior to deploying it (on a microk8s K8s cluster of one or more nodes), there ar
 
 * `cluster`: namespace, storage classes and whether the cluster provisions persistent volumes dynamically (`managed: true`).
 * `network`: ingress/tls configuration, public hostname and whether the UI is exposed directly or through a reverse proxy (`link`).
-* `frontend`, `portalbackend`, `portalbackendDatabase`: container images and component specific options.
+* `platform-ui`, `platform-backend`, `platformBackendDatabase`: container images and component specific options.
 * `keycloak`: toggles the connection parameters to the external Keycloak instance (`enabled`, `host`, `protocol`, `realm`, `clientId`).
 
 Copy `values.yaml` to a new file (for example `my-values.yaml`) and edit it in-place. A few important knobs:
@@ -66,14 +66,14 @@ network:
   publicHost: mip.example.org
   publicProtocol: https
 
-frontend:
+platform-ui:
   backend:
-    host: portalbackend-service
+    host: platform-backend-service
     port: 8080
     context: services
   ingress:
     redirectRootTo: /home       # optional 302 redirect for the landing page
-    tlsSecretName: frontend-tls
+    tlsSecretName: platform-ui-tls
 
 keycloak:
   enabled: true
@@ -82,7 +82,7 @@ keycloak:
   realm: MIP
   clientId: mipfed
 
-portalbackend:
+platform-backend:
   service:
     exposeDebug:
       enabled: false       # switch to true to publish debugging ports through a LoadBalancer
