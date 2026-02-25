@@ -174,14 +174,14 @@ services:
     restart: unless-stopped
 
   platform_ui:
-    image: hbpmip/platform-ui:${FRONTEND}
+    image: hbpmip/platform-ui:${PLATFORM_UI}
     ports:
       - "80:80"
     environment:
       PLATFORM_BACKEND_SERVER: platform-backend:8080
       PLATFORM_BACKEND_CONTEXT: services
       NOTEBOOK_ENABLED: 0
-      FRONTEND_VERSION: "${FRONTEND}"
+      FRONTEND_VERSION: "${PLATFORM_UI}"
       BACKEND_VERSION: "${PLATFORM_BACKEND}"
       EXAFLOW_VERSION: "${EXAFLOW}"
       MIP_VERSION: "${MIP}"
