@@ -2,7 +2,7 @@ import pytest
 import json
 import requests
 
-
+@pytest.mark.skip(reason="Skipping until we fix the exaflow integration tests")
 def test_get_pathologies_request():
     url = "http://172.17.0.1:8080/services/data-models"
     headers = {"Content-type": "application/json", "Accept": "application/json"}

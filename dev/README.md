@@ -40,6 +40,10 @@
     ```
     ./start.sh
     ```
+   The script waits for `http://127.0.0.1:8080/services/data-models` and verifies 4 data models are loaded.
+   ```
+   ./start.sh
+   ```
 
 4. To test if the MIP stack is properly setup run the 'test.sh':
     ```
