@@ -1,5 +1,5 @@
 cluster:
-  namespace: federation-handson
+  namespace: default
   managed: true
   storageClasses:
     local: k8s-local-storage
@@ -9,7 +9,7 @@ network:
   link: proxied
   externalProtocol: https
   publicProtocol: https
-  publicHost: handson.hbpmip.link
+  publicHost: default
   ingress:
     enabled: true
     className: nginx-public
@@ -75,6 +75,7 @@ platformBackendDatabase:
   persistence:
     localPath: /opt/mip-deployment/.stored_data/platform_backenddb
     size: 1Gi
+
 keycloak:
   enabled: true
   host: iam.ebrains.eu

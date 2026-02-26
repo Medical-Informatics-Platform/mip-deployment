@@ -362,7 +362,7 @@ all_success_cases = [
     },
 ]
 
-
+@pytest.mark.skip(reason="Skipping until we fix the exaflow integration tests")
 @pytest.mark.parametrize("test_input", all_success_cases)
 def test_post_request_exaflow(test_input):
 

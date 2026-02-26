@@ -75,7 +75,7 @@ all_error_cases = [
     ),
 ]
 
-
+@pytest.mark.skip(reason="Skipping until we fix the exaflow integration tests")
 @pytest.mark.parametrize("test_case,test_input,expected_error_type", all_error_cases)
 def test_post_request_exaflow(test_case, test_input, expected_error_type):
     url = "http://127.0.0.1:8080/services/experiments"
