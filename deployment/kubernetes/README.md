@@ -26,19 +26,19 @@ From now on, most of our deployments will be done with Ubuntu Server 22.04, but 
 ## Components:
 Now, with the Kubernetes (K8s) deployment, we have 2 main component packs, that need to be deployed, which come as Helm charts:
 
-### The engine: [Exaflow](https://github.com/madgik/Exaflow/tree/master/kubernetes)
-* [controller](https://github.com/madgik/Exaflow/tree/master/exaflow/controller)
-* [node](https://github.com/madgik/Exaflow/tree/master/exaflow/node)
+### The engine: [Exaflow](https://github.com/madgik/exaflow/tree/master/kubernetes)
+* [controller](https://github.com/madgik/exaflow/tree/master/exaflow/controller)
+* [worker](https://github.com/madgik/exaflow/tree/master/exaflow/worker)
 
 * [smpc-db](https://github.com/docker-library/mongo)
 * [smpc-queue](https://github.com/docker-library/redis)
 * [smpc-coordinator](https://github.com/Exaflow/tree/master/exaflow)
 * [smpc_player](https://github.com/Exaflow/tree/master/exaflow)
-* [smpc-client](https://github.com/madgik/Exaflow/tree/master/exaflow)
+* [smpc-client](https://github.com/madgik/exaflow/tree/master/exaflow)
 
 ### The web app stack:
-* [platform-ui](https://github.com/HBPMedical/platform-ui): The "Web App" UI
-* [platform-backend](https://github.com/HBPMedical/platform-backend): The "Backend API" which supports the Web App
+* [platform-ui](https://github.com/Medical-Informatics-Platform/platform-ui): The "Web App" UI
+* [platform-backend](https://github.com/Medical-Informatics-Platform/platform-backend): The "Backend API" which supports the Web App
     * Its database bootstrap script lives next to the application code (`config/scripts/bootstrap-platform-backend-db.sh`) and the same script is vendored in this chart under `files/platform-backend-db-init.sh` so the deployment can mount it via ConfigMap without embedding a large shell block inside the template. Keeping both copies in sync lets the container image and the Helm release evolve together.
 * [platform_backend_db](https://github.com/docker-library/postgres): The platform-backend's database
 **External Keycloak**: Authentication is provided by an existing Keycloak realm; this chart only wires the configuration values so the UI stack can reach it.
@@ -81,9 +81,10 @@ keycloak:
   protocol: https
   realm: MIP
   clientId: mipfed
+```
 
 The reachability diagram from the legacy profiles is still valid as a reference for deciding the correct `network.*` settings:
-![MIP Reachability Scheme](../doc/MIP_Configuration.png)
+![MIP Reachability Scheme](../docs/MIP_Configuration.png)
 
 ### MACHINE_MAIN_IP
 This is the machine's main IP address. Generally, it's the IP address of the first NIC after the local one.  
@@ -137,7 +138,7 @@ For a "federated" deployment, you may want to add nodes to your cluster. "microk
 ### Exaflow Deployment
 * Install the repository content
   ```
-  sudo git clone https://github.com/madgik/Exaflow /opt/exaflow
+  sudo git clone https://github.com/madgik/exaflow /opt/exaflow
   ```
   ```
   sudo chown -R mipadmin.mipadmin /opt/exaflow
@@ -167,14 +168,14 @@ For a "federated" deployment, you may want to add nodes to your cluster. "microk
   microk8s helm3 install exaflow /opt/exaflow/kubernetes
   ```
 
-For a more in-depth guide on deploying Exaflow, please refer to the documentation available on the [Exaflow Kubernetes repository](https://github.com/madgik/Exaflow/blob/master/kubernetes).
+For a more in-depth guide on deploying Exaflow, please refer to the documentation available on the [Exaflow Kubernetes repository](https://github.com/madgik/exaflow/blob/master/kubernetes).
 
 
 
 ### Web App Stack Components Deployment
 * Install the repository content
   ```
-  sudo git clone https://github.com/HBPMedical/mip-deployment /opt/mip-deployment
+  sudo git clone https://github.com/Medical-Informatics-Platform/mip-deployment /opt/mip-deployment
   ```
   ```
   sudo chown -R mipadmin.mipadmin /opt/mip-deployment

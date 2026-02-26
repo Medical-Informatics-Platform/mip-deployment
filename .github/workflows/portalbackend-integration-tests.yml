@@ -11,39 +11,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: 3.8
+          python-version: "3.10"
 
       - name: Install docker compose
         uses: KengoTODA/actions-setup-docker-compose@v1
         with:
-          version: '2.30.1'
+          version: '5.1.0'
 
       - name: Docker compose version
         run: docker compose version
 
-      - name: Prepare env file
-        working-directory: ./dev/
-        run: |
-          if [ -f .env.example ] && [ ! -f .env ]; then
-            mv .env.example .env
-          fi
+      - name: Copy the env file
+        working-directory: ./deployment/dev/
+        run: cp .env.example .env
 
-      - name: Deploy portalbackend and exaflow
-        working-directory: ./dev/
+      - name: Deploy the stack
+        working-directory: ./deployment/dev/
         run: bash start.sh
 
       - name: Get deployment status
         run: docker ps
 
       - name: Install python dependencies
-        working-directory: ./dev/
+        working-directory: ./deployment/dev/
         run: pip install -r requirements.txt
 
-      - name: Run the dev tests
-        working-directory: ./dev/
+      - name: Run the integration tests
+        working-directory: ./deployment/dev/
         run: pytest
