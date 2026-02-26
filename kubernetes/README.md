@@ -39,7 +39,7 @@ Now, with the Kubernetes (K8s) deployment, we have 2 main component packs, that 
 ### The web app stack:
 * [platform-ui](https://github.com/HBPMedical/platform-ui): The "Web App" UI
 * [platform-backend](https://github.com/HBPMedical/platform-backend): The "Backend API" which supports the Web App
-    * Its database bootstrap script lives next to the application code (`config/scripts/bootstrap-portal-db.sh`) and the same script is vendored in this chart under `files/platform-backend-db-init.sh` so the deployment can mount it via ConfigMap without embedding a large shell block inside the template. Keeping both copies in sync lets the container image and the Helm release evolve together.
+    * Its database bootstrap script lives next to the application code (`config/scripts/bootstrap-platform-backend-db.sh`) and the same script is vendored in this chart under `files/platform-backend-db-init.sh` so the deployment can mount it via ConfigMap without embedding a large shell block inside the template. Keeping both copies in sync lets the container image and the Helm release evolve together.
 * [platform_backend_db](https://github.com/docker-library/postgres): The platform-backend's database
 **External Keycloak**: Authentication is provided by an existing Keycloak realm; this chart only wires the configuration values so the UI stack can reach it.
 
