@@ -26,6 +26,13 @@ jobs:
       - name: Docker compose version
         run: docker compose version
 
+      - name: Prepare env file
+        working-directory: ./dev/
+        run: |
+          if [ -f .env.example ] && [ ! -f .env ]; then
+            mv .env.example .env
+          fi
+
       - name: Deploy portalbackend and exaflow
         working-directory: ./dev/
         run: bash start.sh
