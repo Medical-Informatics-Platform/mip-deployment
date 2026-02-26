@@ -108,7 +108,7 @@ services:
       - exaflow_controller
       - exaflow_aggregation_server
     volumes:
-      - ../data:/opt/data
+      - ./data:/opt/data
     restart: unless-stopped
     networks:
       default:
@@ -118,7 +118,7 @@ services:
     image: postgres:11.20-alpine
     volumes:
       - ./.stored_data/platform_backenddb:/var/lib/postgresql/data
-      - ../config/scripts/bootstrap-platform-backend-db.sh:/docker-entrypoint-initdb.d/10-bootstrap-platform-db.sh:ro
+      - ../kubernetes/files/platform-backend-db-init.sh:/docker-entrypoint-initdb.d/10-bootstrap-platform-db.sh:ro
     hostname: platform_backend_db
     environment:
       POSTGRES_USER: postgres

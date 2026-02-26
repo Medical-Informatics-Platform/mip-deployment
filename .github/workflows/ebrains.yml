@@ -13,14 +13,15 @@ jobs:
       - name: syncmaster
         uses: wei/git-sync@v3
         with:
-          source_repo: "HBPMedical/mip-deployment"
+          source_repo: "Medical-Informatics-Platform/mip-deployment"
           source_branch: "master"
           destination_repo: "https://ghpusher:${{ secrets.EBRAINS_GITLAB_ACCESS_TOKEN }}@gitlab.ebrains.eu/hbp-mip/mip-deployment.git"
           destination_branch: "master"
+
       - name: synctags
         uses: wei/git-sync@v3
         with:
-          source_repo: "HBPMedical/mip-deployment"
+          source_repo: "Medical-Informatics-Platform/mip-deployment"
           source_branch: "refs/tags/*"
           destination_repo: "https://ghpusher:${{ secrets.EBRAINS_GITLAB_ACCESS_TOKEN }}@gitlab.ebrains.eu/hbp-mip/mip-deployment.git"
           destination_branch: "refs/tags/*"
