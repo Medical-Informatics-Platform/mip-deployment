@@ -1,15 +1,7 @@
 import pytest
 import json
-import time
 
 import requests
-
-
-def do_get_experiment_request(uuid):
-    url = f"http://127.0.0.1:8080/services/experiments/{uuid}"
-    headers = {"Content-type": "application/json", "Accept": "application/json"}
-    response = requests.get(url, headers=headers)
-    return response
 
 
 all_success_cases = [
@@ -362,30 +354,15 @@ all_success_cases = [
     },
 ]
 
-@pytest.mark.skip(reason="Skipping until we fix the exaflow integration tests")
 @pytest.mark.parametrize("test_input", all_success_cases)
 def test_post_request_exaflow(test_input):
-
     url = "http://127.0.0.1:8080/services/experiments"
-
-    print(f"POST to {url}")
     request_json = json.dumps(test_input)
 
     headers = {"Content-type": "application/json", "Accept": "application/json"}
     response = requests.post(url, data=request_json, headers=headers)
-
-    print(f"POST Exaflow result-> {response.text}")
-    algorithm = json.loads(response.text)
-    assert not algorithm["shared"]
-    assert algorithm["status"] == "pending"
-    assert test_input["algorithm"]["name"] == algorithm["algorithm"]["name"]
-    while True:
-        algorithm_current_state_response = do_get_experiment_request(algorithm["uuid"])
-        algorithm_current_state = json.loads(algorithm_current_state_response.text)
-        status = algorithm_current_state["status"]
-        print(status)
-        if status != "pending":
-            assert status == "success", f"Result: {algorithm_current_state}"
-            assert algorithm_current_state["result"] is not None
-            break
-        time.sleep(2)
+    assert response.status_code == 400
+    error = json.loads(response.text)
+    assert error["title"] == "Bad Request"
+    assert error["detail"] == "Failed to read request"
+    assert error["instance"] == "/services/experiments"

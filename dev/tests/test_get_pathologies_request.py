@@ -2,7 +2,6 @@ import pytest
 import json
 import requests
 
-@pytest.mark.skip(reason="Skipping until we fix the exaflow integration tests")
 def test_get_pathologies_request():
     url = "http://172.17.0.1:8080/services/data-models"
     headers = {"Content-type": "application/json", "Accept": "application/json"}
@@ -11,23 +10,32 @@ def test_get_pathologies_request():
     pathologies = json.loads(response.text)
     assert len(pathologies) == 4
 
-    assert all(
-        pathology["code"] in ["dementia_longitudinal", "dementia", "mentalhealth", "tbi"]
-        for pathology in pathologies
-    )
+    pathology_codes = {pathology["code"] for pathology in pathologies}
+    assert pathology_codes == {"dementia_longitudinal", "dementia", "mentalhealth", "tbi"}
 
-    assert all(
-        len(pathology["datasets"]) in [1, 1, 3, 1] for pathology in pathologies
-    )
-    for pathology in pathologies:
-        print(f"Pathology: {pathology["variables"]=}")
-    assert all(
-        count_datasets_from_cdes(pathology) in [1, 1, 3, 1] for pathology in pathologies
-    )
+    datasets_count_by_code = {pathology["code"]: len(pathology["datasets"]) for pathology in pathologies}
+    assert datasets_count_by_code == {
+        "dementia": 3,
+        "dementia_longitudinal": 1,
+        "mentalhealth": 1,
+        "tbi": 1,
+    }
 
-    assert all(
-        count_cdes(pathology) in [20, 185, 184, 191] for pathology in pathologies
-    )
+    dataset_enum_count_by_code = {pathology["code"]: count_datasets_from_cdes(pathology) for pathology in pathologies}
+    assert dataset_enum_count_by_code == {
+        "dementia": 3,
+        "dementia_longitudinal": 4,
+        "mentalhealth": 1,
+        "tbi": 1,
+    }
+
+    cdes_count_by_code = {pathology["code"]: count_cdes(pathology) for pathology in pathologies}
+    assert cdes_count_by_code == {
+        "dementia": 184,
+        "dementia_longitudinal": 185,
+        "mentalhealth": 191,
+        "tbi": 20,
+    }
 
 
 def count_cdes(metadata_hierarchy) -> int:
