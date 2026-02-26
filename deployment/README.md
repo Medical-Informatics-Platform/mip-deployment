@@ -1,4 +1,4 @@
-# Medical Informatics Platform (MIP)
+# Deployment of the Medical Informatics Platform (MIP)
 
 This folder contains the deployment and operations documentation for MIP.
 
@@ -8,7 +8,7 @@ This folder contains the deployment and operations documentation for MIP.
 Use the development guide for local/non-production setup with docker-compose.
 
 - [Development deployment guide](dev/README.md)
-- Includes prerequisites (Python, Poetry, docker-compose), startup instructions, basic tests, and shutdown steps.
+- Includes prerequisites (Python, docker-compose), startup instructions, basic tests, and shutdown steps.
 
 ### Kubernetes Deployment
 Use the Kubernetes guide for production-like and federated installations.
