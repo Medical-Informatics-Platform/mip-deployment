@@ -118,27 +118,24 @@ services:
     image: postgres:11.20-alpine
     volumes:
       - ./.stored_data/platform_backenddb:/var/lib/postgresql/data
+      - ../config/scripts/bootstrap-platform-backend-db.sh:/docker-entrypoint-initdb.d/10-bootstrap-platform-db.sh:ro
     hostname: platform_backend_db
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test
+      POSTGRES_DB: postgres
+      PLATFORM_DB_NAME: portal
+      PLATFORM_DB_USER: portal
+      PLATFORM_DB_PASSWORD: portalpwd
     command: -p 5433
     ports:
       - '5433:5433'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost -p 5433"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     restart: unless-stopped
-
-  create_dbs:
-    image: hbpmip/create-databases:1.1.0
-    depends_on:
-      - platform_backend_db
-    environment:
-      DB_HOST: platform_backend_db
-      DB_PORT: 5433
-      DB_ADMIN_USER: postgres
-      DB_ADMIN_PASSWORD: test
-      DB4: portal
-      USER4: portal
-      PASSWORD4: portalpwd
-    restart: on-failure
 
   platform-backend:
     image: hbpmip/platform-backend:${PLATFORM_BACKEND}
@@ -146,8 +143,10 @@ services:
       - '8080:8080'
       - '8089:8089'
     depends_on:
-      - create_dbs
-      - exaflow_controller
+      platform_backend_db:
+        condition: service_healthy
+      exaflow_controller:
+        condition: service_started
     environment:
       ### LOGGER ###
       LOG_LEVEL: INFO
