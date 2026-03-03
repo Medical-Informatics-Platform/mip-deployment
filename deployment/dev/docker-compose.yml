@@ -160,7 +160,7 @@ services:
       ### Exaflow ###
       ALGORITHM_UPDATE_INTERVAL: 30     # seconds
       EXAFLOW_URL: http://exaflow_controller:5000
-      FRONTEND_BASE_URL: "${FRONTEND_BASE_URL}"
+      PLATFORM_UI_BASE_URL: "${PLATFORM_UI_BASE_URL}"
       ### Keycloak (external) ###
       AUTHENTICATION: "${AUTHENTICATION}"
       KEYCLOAK_AUTH_URL: "${KEYCLOAK_AUTH_URL}"
