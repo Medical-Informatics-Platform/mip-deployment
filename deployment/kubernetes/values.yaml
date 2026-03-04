@@ -55,7 +55,7 @@ platform-ui:
 platform-backend:
   image:
     repository: hbpmip/platform-backend
-    tag: 9.0.0
+    tag: 9.0.1
   config:
     logLevel: INFO
     logLevelFramework: INFO
