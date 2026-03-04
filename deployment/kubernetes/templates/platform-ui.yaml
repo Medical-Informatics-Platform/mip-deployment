@@ -3,6 +3,7 @@
 {{- $backendHost := default "" $platformUi.backend.host -}}
 {{- $backendPort := default 8080 $platformUi.backend.port -}}
 {{- $backendContext := default "services" $platformUi.backend.context -}}
+{{- $notebookEnabled := default false .Values.notebook.enabled -}}
 {{- $ingressEnabled := and (default true .Values.network.ingress.enabled) (default true $platformUi.ingress.enabled) -}}
 {{- $publicHost := default "" .Values.network.publicHost -}}
 ---
@@ -26,12 +27,24 @@ spec:
           image: "{{ $platformUi.image.repository }}:{{ $platformUi.image.tag }}"
           ports:
             - containerPort: 80
-{{- if $backendHost }}
+{{- if or $backendHost $notebookEnabled }}
           env:
+            - name: NOTEBOOK_ENABLED
+              value: {{ ternary "1" "0" $notebookEnabled | quote }}
+{{- if $backendHost }}
             - name: PLATFORM_BACKEND_SERVER
               value: {{ printf "%s:%v" $backendHost $backendPort | quote }}
             - name: PLATFORM_BACKEND_CONTEXT
               value: {{ $backendContext | quote }}
+{{- end }}
+{{- if $notebookEnabled }}
+            - name: JUPYTER_SERVER
+              value: {{ printf "%s:%v" (default "jupyterhub-proxy-public" .Values.notebook.server.host) (default 80 .Values.notebook.server.port) | quote }}
+            - name: JUPYTER_CONTEXT
+              value: {{ default "notebook" .Values.notebook.server.context | quote }}
+            - name: JUPYTER_LANDING_PATH
+              value: {{ default "/hub/spawn" .Values.notebook.server.landingPath | quote }}
+{{- end }}
 {{- end }}
 ---
 apiVersion: v1
