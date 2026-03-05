@@ -24,7 +24,7 @@ engines:
       tag: 1.0.0
 mip:
   displayName: MIP
-  version: 9.0.1
+  version: 9.0.2
 datacatalog:
   protocol: https
   host: ""
