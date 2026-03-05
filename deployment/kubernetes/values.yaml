@@ -55,7 +55,7 @@ platform-ui:
 platform-backend:
   image:
     repository: hbpmip/platform-backend
-    tag: 9.0.1
+    tag: 9.1.0
   config:
     logLevel: INFO
     logLevelFramework: INFO
@@ -71,7 +71,7 @@ platform-backend:
 platformBackendDatabase:
   image:
     repository: postgres
-    tag: 11.3-alpine
+    tag: 18.3-alpine
   persistence:
     localPath: /opt/mip-deployment/.stored_data/platform_backenddb
     size: 1Gi

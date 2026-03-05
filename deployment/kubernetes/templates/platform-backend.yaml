@@ -250,7 +250,7 @@ spec:
             - containerPort: 5432
           volumeMounts:
             - name: platform-backend-db-claim0
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
             - name: platform-backend-db-init
               mountPath: /opt/platform-backend-db-init
               readOnly: true
