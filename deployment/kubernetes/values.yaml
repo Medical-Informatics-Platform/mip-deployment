@@ -1,5 +1,5 @@
 cluster:
-  namespace: federation-handson
+  namespace: default
   managed: true
   storageClasses:
     local: k8s-local-storage
@@ -9,7 +9,7 @@ network:
   link: proxied
   externalProtocol: https
   publicProtocol: https
-  publicHost: https://handson.hbpmip.link
+  publicHost: default
   ingress:
     enabled: true
     className: nginx-public
