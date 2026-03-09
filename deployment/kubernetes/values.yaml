@@ -10,12 +10,6 @@ network:
   externalProtocol: https
   publicProtocol: https
   publicHost: default
-  ingress:
-    enabled: true
-    className: nginx-public
-    certManagerClusterIssuer: letsencrypt-public
-    tlsSecretName: platform-ui-tls
-    redirectRootTo: /home
 engines:
   exaflow:
     url: "http://exaflow-controller-service:5000"
@@ -39,6 +33,7 @@ platform-ui:
     className: nginx-public
     certManagerClusterIssuer: letsencrypt-public
     tlsSecretName: platform-ui-tls
+    redirectRootTo: /home
   backend:
     host: platform-backend-service
     port: 8080
