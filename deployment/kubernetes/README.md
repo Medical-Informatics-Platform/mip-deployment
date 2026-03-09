@@ -54,8 +54,8 @@ Afterward, The dataset CSV files should be placed in their proper pathology fold
 Prior to deploying it (on a microk8s K8s cluster of one or more nodes), there are a few adjustments to make in `values.yaml`. Each top-level section controls a part of the stack:
 
 * `cluster`: namespace, storage classes and whether the cluster provisions persistent volumes dynamically (`managed: true`).
-* `network`: ingress/tls configuration, public hostname and whether the UI is exposed directly or through a reverse proxy (`link`).
-* `platform-ui`, `platform-backend`, `platformBackendDatabase`: container images and component specific options.
+* `network`: public hostname, protocols, and whether the UI is exposed directly or through a reverse proxy (`link`).
+* `platform-ui`, `platform-backend`, `platformBackendDatabase`: container images and component specific options (including the platform-ui ingress/tls settings).
 * `keycloak`: toggles the connection parameters to the external Keycloak instance (`enabled`, `host`, `protocol`, `realm`, `clientId`).
 
 Copy `values.yaml` to a new file (for example `my-values.yaml`) and edit it in-place. A few important knobs:

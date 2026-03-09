@@ -1,9 +1,13 @@
 {{- $namespace := include "mip.namespace" . -}}
 {{- $platformUi := index .Values "platform-ui" -}}
+{{- $ingress := default (dict) $platformUi.ingress -}}
 {{- $backendHost := default "" $platformUi.backend.host -}}
 {{- $backendPort := default 8080 $platformUi.backend.port -}}
 {{- $backendContext := default "services" $platformUi.backend.context -}}
-{{- $ingressEnabled := and (default true .Values.network.ingress.enabled) (default true $platformUi.ingress.enabled) -}}
+{{- $ingressEnabled := true -}}
+{{- if hasKey $ingress "enabled" -}}
+{{- $ingressEnabled = $ingress.enabled -}}
+{{- end -}}
 {{- $publicHost := default "" .Values.network.publicHost -}}
 ---
 apiVersion: apps/v1
@@ -60,12 +64,12 @@ metadata:
   name: platform-ui-ingress
   namespace: {{ $namespace }}
   annotations:
-    kubernetes.io/ingress.class: {{ default "nginx" $platformUi.ingress.className | quote }}
-{{- if $platformUi.ingress.certManagerClusterIssuer }}
-    cert-manager.io/cluster-issuer: {{ $platformUi.ingress.certManagerClusterIssuer | quote }}
+    kubernetes.io/ingress.class: {{ default "nginx" $ingress.className | quote }}
+{{- if $ingress.certManagerClusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ $ingress.certManagerClusterIssuer | quote }}
 {{- end }}
     nginx.ingress.kubernetes.io/rewrite-target: "/"
-{{- $redirect := default "" $platformUi.ingress.redirectRootTo -}}
+{{- $redirect := default "" $ingress.redirectRootTo -}}
 {{- if $redirect }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($request_uri = "/") {
@@ -73,12 +77,12 @@ metadata:
       }
 {{- end }}
 spec:
-  ingressClassName: {{ default "nginx" $platformUi.ingress.className | quote }}
-{{- if and .Values.network.ingress.tlsSecretName (not (empty $publicHost)) }}
+  ingressClassName: {{ default "nginx" $ingress.className | quote }}
+{{- if and $ingress.tlsSecretName (not (empty $publicHost)) }}
   tls:
     - hosts:
         - {{ $publicHost }}
-      secretName: {{ .Values.network.ingress.tlsSecretName }}
+      secretName: {{ $ingress.tlsSecretName }}
 {{- end }}
   rules:
     - host: {{ $publicHost }}
