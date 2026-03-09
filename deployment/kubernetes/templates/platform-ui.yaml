@@ -1,5 +1,6 @@
 {{- $namespace := include "mip.namespace" . -}}
 {{- $platformUi := index .Values "platform-ui" -}}
+{{- $platformBackend := index .Values "platform-backend" -}}
 {{- $ingress := default (dict) $platformUi.ingress -}}
 {{- $backendHost := default "" $platformUi.backend.host -}}
 {{- $backendPort := default 8080 $platformUi.backend.port -}}
@@ -30,8 +31,16 @@ spec:
           image: "{{ $platformUi.image.repository }}:{{ $platformUi.image.tag }}"
           ports:
             - containerPort: 80
-{{- if $backendHost }}
           env:
+            - name: FRONTEND_VERSION
+              value: {{ default "" $platformUi.image.tag | quote }}
+            - name: BACKEND_VERSION
+              value: {{ default "" $platformBackend.image.tag | quote }}
+            - name: EXAFLOW_VERSION
+              value: {{ default "" .Values.engines.exaflow.image.tag | quote }}
+            - name: MIP_VERSION
+              value: {{ default "" .Values.mip.version | quote }}
+{{- if $backendHost }}
             - name: PLATFORM_BACKEND_SERVER
               value: {{ printf "%s:%v" $backendHost $backendPort | quote }}
             - name: PLATFORM_BACKEND_CONTEXT
